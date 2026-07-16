@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: slot-jackpot-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/jackpot_db}
+    username: ${DB_USER:jackpot}
+    password: ${DB_PASSWORD:jackpot}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_JWKS_URL:http://localhost:8081/.well-known/jwks.json}
+
+floor-management:
+  base-url: ${FLOOR_MANAGEMENT_SERVICE_URL:http://localhost:8086}
+
+server:
+  port: ${SERVER_PORT:8087}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","logger":"%logger","message":"%msg","correlationId":"%X{correlationId}"}%n'
