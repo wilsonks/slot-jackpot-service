@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: jackpot_db
+      POSTGRES_USER: jackpot
+      POSTGRES_PASSWORD: jackpot
+    ports:
+      - "5433:5432"
+    volumes:
+      - jackpot_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jackpot -d jackpot_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  slot-jackpot-service:
+    build: .
+    ports:
+      - "8087:8087"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/jackpot_db
+      DB_USER: jackpot
+      DB_PASSWORD: jackpot
+      SERVER_PORT: 8087
+      FLOOR_MANAGEMENT_SERVICE_URL: http://localhost:8086
+      AUTH_SERVICE_JWKS_URL: http://localhost:8081/.well-known/jwks.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  jackpot_pgdata:
