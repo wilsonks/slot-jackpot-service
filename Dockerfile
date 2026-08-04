@@ -1,15 +1,17 @@
 # --- Build stage ---
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY gradlew settings.gradle.kts build.gradle.kts ./
-COPY gradle ./gradle
-RUN ./gradlew dependencies --no-daemon --quiet || true
+RUN keytool -printcert -sslserver repo.maven.apache.org:443 -rfc > /tmp/repo-maven.pem \
+    && keytool -importcert -noprompt -alias repo-maven \
+    -file /tmp/repo-maven.pem -cacerts -storepass changeit
+COPY pom.xml ./
+RUN mvn -q -DskipTests dependency:go-offline
 COPY src ./src
-RUN ./gradlew bootJar --no-daemon -x test
+RUN mvn -q -DskipTests package
 
 # --- Runtime stage ---
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8087
 ENTRYPOINT ["java", "-jar", "app.jar"]

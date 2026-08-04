@@ -91,16 +91,22 @@ Contribute and win endpoints (`POST /api/v1/jackpots/{id}/contribute`, `POST /ap
 docker-compose up postgres -d
 
 # Run the service
-./gradlew bootRun
+mvn spring-boot:run
 ```
 
 ## Running Tests
 
 ```bash
-./gradlew test
+mvn test
 ```
 
 Tests use Testcontainers (Docker required) for the integration tests.
+
+## Building
+
+```bash
+mvn clean install
+```
 
 ## Building Docker Image
 
